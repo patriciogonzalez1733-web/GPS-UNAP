@@ -1,19 +1,23 @@
 <?php
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/auth.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $metodo = $_SERVER['REQUEST_METHOD'];
 
+if ($metodo !== 'GET') {
+    exigirAdminApi();
+}
+
 if ($metodo === 'GET') {
     $sql = 'SELECT u.*, c.nombre AS categoria_nombre, c.icono AS categoria_icono, p.nombre AS piso_nombre
             FROM ubicaciones u
-            JOIN categorias c ON c.id = u.categoria_id
-            JOIN pisos p ON p.id = u.piso_id';
+            JOIN categorias c ON c.id_categoria = u.id_categoria
+            JOIN pisos p ON p.id_piso = u.id_piso';
 
-    if (isset($_GET['piso_id'])) {
-        $stmt = $pdo->prepare($sql . ' WHERE u.piso_id = ?');
-        $stmt->execute([(int) $_GET['piso_id']]);
+    if (isset($_GET['id_piso'])) {
+        $stmt = $pdo->prepare($sql . ' WHERE u.id_piso = ?');
+        $stmt->execute([(int) $_GET['id_piso']]);
     } else {
         $stmt = $pdo->query($sql);
     }
@@ -26,19 +30,19 @@ if ($metodo === 'POST') {
     $datos = json_decode(file_get_contents('php://input'), true);
 
     $stmt = $pdo->prepare(
-        'INSERT INTO ubicaciones (piso_id, categoria_id, nodo_cercano_id, nombre, descripcion, coord_x, coord_y)
+        'INSERT INTO ubicaciones (id_piso, id_categoria, id_nodo_cercano, nombre, descripcion, coord_x, coord_y)
          VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
     $stmt->execute([
-        (int) $datos['piso_id'],
-        (int) $datos['categoria_id'],
-        !empty($datos['nodo_cercano_id']) ? (int) $datos['nodo_cercano_id'] : null,
+        (int) $datos['id_piso'],
+        (int) $datos['id_categoria'],
+        !empty($datos['id_nodo_cercano']) ? (int) $datos['id_nodo_cercano'] : null,
         trim($datos['nombre']),
         $datos['descripcion'] ?? null,
         (float) $datos['coord_x'],
         (float) $datos['coord_y'],
     ]);
-    echo json_encode(['id' => $pdo->lastInsertId()]);
+    echo json_encode(['id_ubicacion' => $pdo->lastInsertId()]);
     exit;
 }
 
@@ -46,30 +50,30 @@ if ($metodo === 'PUT') {
     $datos = json_decode(file_get_contents('php://input'), true);
 
     $stmt = $pdo->prepare(
-        'UPDATE ubicaciones SET categoria_id = ?, nodo_cercano_id = ?, nombre = ?, descripcion = ?, coord_x = ?, coord_y = ?
-         WHERE id = ?'
+        'UPDATE ubicaciones SET id_categoria = ?, id_nodo_cercano = ?, nombre = ?, descripcion = ?, coord_x = ?, coord_y = ?
+         WHERE id_ubicacion = ?'
     );
     $stmt->execute([
-        (int) $datos['categoria_id'],
-        !empty($datos['nodo_cercano_id']) ? (int) $datos['nodo_cercano_id'] : null,
+        (int) $datos['id_categoria'],
+        !empty($datos['id_nodo_cercano']) ? (int) $datos['id_nodo_cercano'] : null,
         trim($datos['nombre']),
         $datos['descripcion'] ?? null,
         (float) $datos['coord_x'],
         (float) $datos['coord_y'],
-        (int) $datos['id'],
+        (int) $datos['id_ubicacion'],
     ]);
     echo json_encode(['ok' => true]);
     exit;
 }
 
 if ($metodo === 'DELETE') {
-    $id = (int) ($_GET['id'] ?? 0);
+    $id = (int) ($_GET['id_ubicacion'] ?? 0);
 
-    $stmt = $pdo->prepare('SELECT imagen_referencia FROM ubicaciones WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT imagen_referencia FROM ubicaciones WHERE id_ubicacion = ?');
     $stmt->execute([$id]);
     $ruta = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare('DELETE FROM ubicaciones WHERE id = ?');
+    $stmt = $pdo->prepare('DELETE FROM ubicaciones WHERE id_ubicacion = ?');
     $stmt->execute([$id]);
 
     if ($ruta && str_starts_with($ruta, 'uploads/ubicaciones/') && !str_contains($ruta, '..')) {

@@ -9,17 +9,17 @@ function resolverExtremo(PDO $pdo, string $identificador): ?array
     $id = (int) substr($identificador, 1);
 
     if ($tipo === 'u') {
-        $stmt = $pdo->prepare('SELECT * FROM ubicaciones WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT * FROM ubicaciones WHERE id_ubicacion = ?');
         $stmt->execute([$id]);
         $ubicacion = $stmt->fetch();
 
-        if (!$ubicacion || !$ubicacion['nodo_cercano_id']) {
+        if (!$ubicacion || !$ubicacion['id_nodo_cercano']) {
             return null;
         }
 
         return [
-            'nodo_grafo_id' => (int) $ubicacion['nodo_cercano_id'],
-            'piso_id' => (int) $ubicacion['piso_id'],
+            'nodo_grafo_id' => (int) $ubicacion['id_nodo_cercano'],
+            'id_piso' => (int) $ubicacion['id_piso'],
             'x' => (float) $ubicacion['coord_x'],
             'y' => (float) $ubicacion['coord_y'],
             'tipo_punto' => 'ubicacion',
@@ -27,7 +27,7 @@ function resolverExtremo(PDO $pdo, string $identificador): ?array
     }
 
     if ($tipo === 'n') {
-        $stmt = $pdo->prepare('SELECT * FROM nodos WHERE id = ?');
+        $stmt = $pdo->prepare('SELECT * FROM nodos WHERE id_nodo = ?');
         $stmt->execute([$id]);
         $nodo = $stmt->fetch();
 
@@ -36,8 +36,8 @@ function resolverExtremo(PDO $pdo, string $identificador): ?array
         }
 
         return [
-            'nodo_grafo_id' => (int) $nodo['id'],
-            'piso_id' => (int) $nodo['piso_id'],
+            'nodo_grafo_id' => (int) $nodo['id_nodo'],
+            'id_piso' => (int) $nodo['id_piso'],
             'x' => (float) $nodo['coord_x'],
             'y' => (float) $nodo['coord_y'],
             'tipo_punto' => $nodo['tipo'],
@@ -91,11 +91,11 @@ function construirAdyacencia(array $nodos, array $conexiones, array $tramosEvita
 {
     $adyacencia = [];
     foreach ($nodos as $n) {
-        $adyacencia[$n['id']] = [];
+        $adyacencia[$n['id_nodo']] = [];
     }
     foreach ($conexiones as $c) {
-        $a = (int) $c['nodo_origen_id'];
-        $b = (int) $c['nodo_destino_id'];
+        $a = (int) $c['id_nodo_origen'];
+        $b = (int) $c['id_nodo_destino'];
         if (isset($tramosEvitados[$a . '-' . $b])) continue;
         $adyacencia[$a][] = [$b, (float) $c['distancia']];
     }
@@ -114,7 +114,7 @@ if (!$origen || !$destino) {
 $nodos = $pdo->query('SELECT * FROM nodos')->fetchAll();
 $nodosPorId = [];
 foreach ($nodos as $n) {
-    $nodosPorId[$n['id']] = $n;
+    $nodosPorId[$n['id_nodo']] = $n;
 }
 $conexiones = $pdo->query('SELECT * FROM conexiones')->fetchAll();
 
@@ -181,14 +181,14 @@ if ($resultado === null) {
 }
 
 $puntos = [];
-$puntos[] = ['piso_id' => $origen['piso_id'], 'x' => $origen['x'], 'y' => $origen['y'], 'tipo' => $origen['tipo_punto']];
+$puntos[] = ['id_piso' => $origen['id_piso'], 'x' => $origen['x'], 'y' => $origen['y'], 'tipo' => $origen['tipo_punto']];
 
 foreach ($resultado['camino'] as $nodoId) {
     $n = $nodosPorId[$nodoId];
-    $puntos[] = ['piso_id' => (int) $n['piso_id'], 'x' => (float) $n['coord_x'], 'y' => (float) $n['coord_y'], 'tipo' => $n['tipo']];
+    $puntos[] = ['id_piso' => (int) $n['id_piso'], 'x' => (float) $n['coord_x'], 'y' => (float) $n['coord_y'], 'tipo' => $n['tipo']];
 }
 
-$puntos[] = ['piso_id' => $destino['piso_id'], 'x' => $destino['x'], 'y' => $destino['y'], 'tipo' => $destino['tipo_punto']];
+$puntos[] = ['id_piso' => $destino['id_piso'], 'x' => $destino['x'], 'y' => $destino['y'], 'tipo' => $destino['tipo_punto']];
 
 echo json_encode([
     'distancia_total' => round($resultado['distancia'], 2),

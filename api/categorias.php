@@ -1,9 +1,13 @@
 <?php
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/auth.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $metodo = $_SERVER['REQUEST_METHOD'];
+
+if ($metodo !== 'GET') {
+    exigirAdminApi();
+}
 
 if ($metodo === 'GET') {
     $stmt = $pdo->query('SELECT * FROM categorias ORDER BY nombre');
@@ -24,13 +28,13 @@ if ($metodo === 'POST') {
 
     $stmt = $pdo->prepare('INSERT INTO categorias (nombre, icono) VALUES (?, ?)');
     $stmt->execute([$nombre, $icono]);
-    echo json_encode(['id' => $pdo->lastInsertId(), 'nombre' => $nombre, 'icono' => $icono]);
+    echo json_encode(['id_categoria' => $pdo->lastInsertId(), 'nombre' => $nombre, 'icono' => $icono]);
     exit;
 }
 
 if ($metodo === 'DELETE') {
-    $id = (int) ($_GET['id'] ?? 0);
-    $stmt = $pdo->prepare('DELETE FROM categorias WHERE id = ?');
+    $id = (int) ($_GET['id_categoria'] ?? 0);
+    $stmt = $pdo->prepare('DELETE FROM categorias WHERE id_categoria = ?');
     $stmt->execute([$id]);
     echo json_encode(['ok' => true]);
     exit;

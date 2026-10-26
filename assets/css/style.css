@@ -134,3 +134,220 @@ button.peligro:hover { background: #8f1717; }
     font-size: 22px;
     filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
 }
+
+.pin-ubicacion.pin-origen span {
+    filter: drop-shadow(0 0 3px #16a34a) drop-shadow(0 0 3px #16a34a) drop-shadow(0 0 7px #16a34a);
+}
+
+.pin-ubicacion.pin-destino span {
+    filter: drop-shadow(0 0 3px #dc2626) drop-shadow(0 0 3px #dc2626) drop-shadow(0 0 7px #dc2626);
+}
+
+.campo.buscador { position: relative; }
+
+.resultados-busqueda {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #cbd2d9;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    z-index: 3000;
+    max-height: 260px;
+    overflow: auto;
+}
+
+.resultados-busqueda div {
+    padding: 9px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.resultados-busqueda div:hover { background: #f3f4f6; }
+
+.seleccion {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 13px;
+    padding-bottom: 6px;
+}
+
+.ayuda { color: #6b7280; }
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 6px 5px 10px;
+    border-radius: 16px;
+}
+
+.chip-origen { background: #dcfce7; color: #166534; }
+.chip-destino { background: #fee2e2; color: #991b1b; }
+
+.chip button {
+    background: transparent;
+    color: inherit;
+    padding: 0 6px;
+    font-size: 14px;
+    border-radius: 50%;
+}
+
+.chip button:hover { background: rgba(0,0,0,.12); }
+
+.popup-acciones {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.popup-acciones button { flex: 1; }
+
+@media (max-width: 600px) {
+    .panel-controles {
+        gap: 8px 10px;
+        padding: 10px 12px;
+    }
+
+    .panel-controles .campo {
+        flex: 1 1 42%;
+    }
+
+    .panel-controles .campo.buscador {
+        flex: 1 1 100%;
+    }
+
+    .panel-controles select,
+    .panel-controles input[type=text] {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .seleccion {
+        flex: 1 1 100%;
+        padding-bottom: 0;
+    }
+}
+
+#mapa.cursor-cruz,
+#mapa.cursor-cruz .leaflet-grab,
+#mapa.cursor-cruz .leaflet-interactive {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16 2v28M2 16h28' stroke='white' stroke-width='5' fill='none'/%3E%3Cpath d='M16 2v28M2 16h28' stroke='red' stroke-width='2' fill='none'/%3E%3C/svg%3E") 16 16, crosshair;
+}
+
+
+@media (max-width: 600px) {
+  
+    body.visor {
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+        touch-action: pan-x pan-y;
+    }
+
+    body.visor #mapa {
+        flex: 1;
+        height: auto;
+        min-height: 0;
+        background: #fff;
+    }
+
+   
+    header.barra {
+        padding: 6px 12px;
+        gap: 10px;
+        flex-wrap: nowrap;
+    }
+
+    header.barra img.logo {
+        height: 36px;
+        padding: 4px 6px;
+    }
+
+    header.barra h1 {
+        font-size: 15px;
+    }
+
+    header.barra a {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    
+    .panel-controles {
+        padding: 8px 12px;
+        gap: 6px 10px;
+    }
+
+    .panel-controles .campo {
+        flex: 1 1 30%;
+        gap: 2px;
+    }
+
+    .panel-controles .campo label {
+        font-size: 11px;
+    }
+
+    .panel-controles .campo.buscador {
+        order: 3;
+        flex: 1 1 100%;
+    }
+
+    .panel-controles .seleccion {
+        order: 4;
+    }
+
+    .panel-controles select,
+    .panel-controles input[type=text] {
+        padding: 5px 8px;
+    }
+
+    .panel-controles button {
+        flex: 0 0 auto;
+        padding: 7px 12px;
+    }
+
+  
+    .info-ruta {
+        position: static;
+        max-width: none;
+        border-radius: 0;
+        box-shadow: 0 -2px 8px rgba(0,0,0,.12);
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .info-ruta br {
+        display: none;
+    }
+
+    .info-ruta button {
+        margin: 4px 0 0 8px !important;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+
+
+    .seleccion {
+        gap: 6px;
+    }
+
+    .chip {
+        flex: 1 1 0;
+        min-width: 0;
+        font-size: 12px;
+        padding: 3px 4px 3px 8px;
+    }
+
+    .chip b {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

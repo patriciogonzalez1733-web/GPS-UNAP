@@ -1,13 +1,17 @@
 <?php
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/auth.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $metodo = $_SERVER['REQUEST_METHOD'];
+
+if ($metodo !== 'GET') {
+    exigirAdminApi();
+}
 $carpetaUploads = __DIR__ . '/../uploads/pisos/';
 
 if ($metodo === 'GET') {
-    $stmt = $pdo->query('SELECT * FROM pisos ORDER BY id');
+    $stmt = $pdo->query('SELECT * FROM pisos ORDER BY id_piso');
     echo json_encode($stmt->fetchAll());
     exit;
 }
@@ -39,18 +43,18 @@ if ($metodo === 'POST') {
 
     $stmt = $pdo->prepare('INSERT INTO pisos (nombre, imagen) VALUES (?, ?)');
     $stmt->execute([$nombre, $nombreArchivo]);
-    echo json_encode(['id' => $pdo->lastInsertId(), 'nombre' => $nombre, 'imagen' => $nombreArchivo]);
+    echo json_encode(['id_piso' => $pdo->lastInsertId(), 'nombre' => $nombre, 'imagen' => $nombreArchivo]);
     exit;
 }
 
 if ($metodo === 'DELETE') {
-    $id = (int) ($_GET['id'] ?? 0);
+    $id = (int) ($_GET['id_piso'] ?? 0);
 
-    $stmt = $pdo->prepare('SELECT imagen FROM pisos WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT imagen FROM pisos WHERE id_piso = ?');
     $stmt->execute([$id]);
     $piso = $stmt->fetch();
 
-    $stmt = $pdo->prepare('DELETE FROM pisos WHERE id = ?');
+    $stmt = $pdo->prepare('DELETE FROM pisos WHERE id_piso = ?');
     $stmt->execute([$id]);
 
     if ($piso && file_exists($carpetaUploads . $piso['imagen'])) {

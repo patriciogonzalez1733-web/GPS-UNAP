@@ -1,15 +1,19 @@
 <?php
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/auth.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $metodo = $_SERVER['REQUEST_METHOD'];
+
+if ($metodo !== 'GET') {
+    exigirAdminApi();
+}
 $carpetaRelativa = 'uploads/ubicaciones/';
 $carpetaUploads = __DIR__ . '/../' . $carpetaRelativa;
 
 function borrarImagenAnterior(PDO $pdo, int $id): void
 {
-    $stmt = $pdo->prepare('SELECT imagen_referencia FROM ubicaciones WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT imagen_referencia FROM ubicaciones WHERE id_ubicacion = ?');
     $stmt->execute([$id]);
     $ruta = $stmt->fetchColumn();
 
@@ -22,7 +26,7 @@ function borrarImagenAnterior(PDO $pdo, int $id): void
 }
 
 if ($metodo === 'POST') {
-    $id = (int) ($_POST['id'] ?? 0);
+    $id = (int) ($_POST['id_ubicacion'] ?? 0);
 
     if ($id === 0 || empty($_FILES['imagen']) || $_FILES['imagen']['error'] !== UPLOAD_ERR_OK) {
         http_response_code(400);
@@ -30,7 +34,7 @@ if ($metodo === 'POST') {
         exit;
     }
 
-    $stmt = $pdo->prepare('SELECT id FROM ubicaciones WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id_ubicacion FROM ubicaciones WHERE id_ubicacion = ?');
     $stmt->execute([$id]);
     if (!$stmt->fetch()) {
         http_response_code(404);
@@ -64,7 +68,7 @@ if ($metodo === 'POST') {
     move_uploaded_file($_FILES['imagen']['tmp_name'], $carpetaUploads . $nombreArchivo);
 
     $ruta = $carpetaRelativa . $nombreArchivo;
-    $stmt = $pdo->prepare('UPDATE ubicaciones SET imagen_referencia = ? WHERE id = ?');
+    $stmt = $pdo->prepare('UPDATE ubicaciones SET imagen_referencia = ? WHERE id_ubicacion = ?');
     $stmt->execute([$ruta, $id]);
 
     echo json_encode(['ok' => true, 'imagen_referencia' => $ruta]);
@@ -72,11 +76,11 @@ if ($metodo === 'POST') {
 }
 
 if ($metodo === 'DELETE') {
-    $id = (int) ($_GET['id'] ?? 0);
+    $id = (int) ($_GET['id_ubicacion'] ?? 0);
 
     borrarImagenAnterior($pdo, $id);
 
-    $stmt = $pdo->prepare('UPDATE ubicaciones SET imagen_referencia = NULL WHERE id = ?');
+    $stmt = $pdo->prepare('UPDATE ubicaciones SET imagen_referencia = NULL WHERE id_ubicacion = ?');
     $stmt->execute([$id]);
 
     echo json_encode(['ok' => true]);
